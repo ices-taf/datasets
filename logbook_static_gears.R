@@ -13,6 +13,7 @@
 library(icesTAF)
 library(icesVMS)
 library(icesVocab)
+library(dplyr)
 
 # get static gear data
 static_gears <-
@@ -23,6 +24,13 @@ static_gears <-
     "Traps" = c("FPN", "FPO", "FYK")
   )
 
+static_gears <-
+  data.frame(
+    gearCode = unlist(static_gears, use.names = FALSE),
+    gearGroup = rep(names(static_gears), sapply(static_gears, length))
+  )
+
+
 # download
 # note to access download a token for the current R session using
 # update_token({ices username})
@@ -30,8 +38,17 @@ static_gears <-
 # to get all years (year = 0)
 logbook_static <-
   get_logbook(
-    gear_code = unlist(static_gears), year = 0, datacall = 2021
+    gear_code = static_gears$gearCode, year = 0, datacall = 2021
   )
+
+logbook_static <-
+  logbook_static %>%
+  select(
+    year, month, icesRectangle, gearCode,
+    fishingDays, totweight,
+    vmsEnabled
+  ) %>%
+  left_join(static_gears)
 
 # save
 write.taf(logbook_static, quote = TRUE)
