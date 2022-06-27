@@ -48,7 +48,7 @@ logbook_static <-
     fishingDays, totweight,
     vmsEnabled
   ) %>%
-  left_join(static_gears)
+  left_join(static_gears, by = "gearCode")
 
 # save
 write.taf(logbook_static, quote = TRUE)
